@@ -36,9 +36,9 @@ public class TTTComputerPlayer
         TTTComputerPlayer AI2 = new TTTComputerPlayer(2, 1, theboard);
         while(theboard.checkWinner() == 0)
         {
-                AI1.takeTurn();
-                if(theboard.checkWinner() == 0)
-                        AI2.takeTurn();
+            AI1.takeTurn();
+            if(theboard.checkWinner() == 0)
+                AI2.takeTurn();
         }
         int win = theboard.checkWinner();
         if(win < 0)
