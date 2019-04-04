@@ -6,37 +6,57 @@ public class TTTHandler extends Thread
     TTTGui client;
     TTTBoard board;
     int ID;
-    volatile LinkedList<String> instructions = new LinkedList<>();
+    private volatile LinkedList<String> instructions = new LinkedList<>();
     public TTTHandler(TTTGui client){
         this.client = client;
     }
     public void run()
     {
-        takeClientTurn();
-        for(int curID = 1; board.checkWinner()==0; curID = (curID % 2) + 1) //Alternate 1 and 2
+        try
         {
-            if(this.ID == curID)
-                takeClientTurn();
-            else ;//Take AI turn
-            if(board.checkWinner()!=0)break;
-            if(this.ID != curID)
-                takeClientTurn();
-            else ;//Take AI turn
+            while(!this.isInterrupted())
+            {
+                try
+                {
+                    while(board == null) takeClientTurn(false);
+                    if(this.isInterrupted()) return;
+                    for(int curID = 1; board.checkWinner()==0; curID = (curID % 2) + 1) //Alternate 1 and 2
+                    {
+                        if(this.ID == curID)
+                            takeClientTurn(true);
+                        else ;//Take AI turn
+                        if(board.checkWinner() != 0)break;
+                        if(this.ID != curID)
+                            takeClientTurn(true);
+                        else ;//Take AI turn
+                    }
+                    client.endGame(board.checkWinner());
+                }
+                catch(TTTException e)
+                {
+                    if(!e.getMessage().equals("Game exiting to main menu!")) throw e;
+                }
+                board = null; ID = 0; instructions.clear();
+            }
         }
-        client.endGame(board.checkWinner());
-        board = null; ID = 0; instructions.clear();
+        catch(Exception e)
+        {
+            if(e.getMessage() != null) System.err.println(e.getMessage());
+            else e.printStackTrace();
+            System.err.println("Exiting thread...");
+        }
     }
     
-    private void takeClientTurn()
+    private void takeClientTurn(boolean isGameTurn) throws TTTException
     {
         instructions.clear();
-        client.turnStart(true);
-        while(true)
+        if(isGameTurn) client.turnStart(true);
+        while(!this.isInterrupted())
         {
             while(instructions.isEmpty()) //Wait for instructions from either side.
                 try {
-                    sleep(1000*5);
-                } catch (InterruptedException ignored) {}
+                    sleep((int)(1000*0.2));
+                } catch (InterruptedException e) {return;}
             while(!instructions.isEmpty())
             {
                 String instruction = instructions.pollFirst().toLowerCase();
@@ -54,7 +74,8 @@ public class TTTHandler extends Thread
                         if(board.getSpace(x, y)==0)
                         {
                             board.setSpace(x,y,ID);
-                            client.turnStart(false);
+                            client.updateButtons(board);
+                            if(isGameTurn) client.turnStart(false);
                             return;
                         }
                         break;
@@ -63,11 +84,17 @@ public class TTTHandler extends Thread
                         board = new TTTBoard();
                         //Add AI client, with opposing ID
                         //opposingID = 3 - ID;
-                        client.turnStart(false);
+                        if(isGameTurn) client.turnStart(false);
                         return;
-
+                    case "menu":
+                        throw new TTTException("Game exiting to main menu!");
                 }
             }
         }
+    }
+    
+    public void addInstruction(String instruction)
+    {
+        instructions.add(instruction);
     }
 }

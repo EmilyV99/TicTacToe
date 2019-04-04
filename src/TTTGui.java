@@ -1,21 +1,17 @@
 import javafx.application.Application;
 import javafx.event.*;
 import javafx.scene.*;
-import javafx.scene.image.*;
 import javafx.scene.text.*;
-import javafx.scene.layout.*;
 import javafx.scene.control.*;
 import javafx.stage.*;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.*;
-import javafx.collections.*;
-import java.io.*;
-import java.net.*;
 import javafx.application.Platform;
 
 public class TTTGui extends Application
 {
-    static final int MINW = 750, MINH = 750, DEFW = 900, DEFH = 900, MAXW = 1000, MAXH = 1000; //Window size
+    static final int MINW = 300, MINH = 300, DEFW = 350, DEFH = 350, MAXW = 400, MAXH = 400, //Window size
+            BTN_W = 60, BTN_H = BTN_W;
     Stage stage;//Stage object
     Scene loadingSc, playSc;
     GridPane loadingGr = new GridPane(), playGr = new GridPane();
@@ -26,7 +22,8 @@ public class TTTGui extends Application
     Button[][] gridButtons = new Button[][]{{b00, b01, b02},{b10, b11, b12},{b20, b21, b22}};
     Text msg = new Text();
     volatile boolean isTurn = false;
-    public static void main(){
+    TTTHandler handler;
+    public static void main(String[] args){
         launch();
     }
     @Override
@@ -39,6 +36,9 @@ public class TTTGui extends Application
             for(Button b : barr)
             {
                 b.setOnAction(e-> buttonClick(e));
+                b.setMinSize(BTN_W, BTN_H);
+                b.setMaxSize(BTN_W, BTN_H);
+                b.setId("gridb");
             }
         for(GridPane grid : grids){
             //grid.setVgap(15);
@@ -54,12 +54,13 @@ public class TTTGui extends Application
             //grid.setGridLinesVisible(true); //Debugging
         }
         //Loading scene
-        loadingGr.add(startx, 1, 1);
-        GridPane.setConstraints(startx, 1, 1, 1, 1, HPos.CENTER, VPos.CENTER);
-        loadingGr.add(starto, 1, 2);
-        GridPane.setConstraints(starto, 1, 2, 1, 1, HPos.CENTER, VPos.CENTER);
-        loadingGr.add(startr, 1, 3);
-        GridPane.setConstraints(startr, 1, 3, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(startx, 0, 1);
+        GridPane.setConstraints(startx, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(starto, 0, 2);
+        GridPane.setConstraints(starto, 0, 2, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(startr, 0, 3);
+        GridPane.setConstraints(startr, 0, 3, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.setVgap(25);
         //
         //Call scene
         playGr.add(b00, 0, 0);
@@ -80,13 +81,15 @@ public class TTTGui extends Application
         GridPane.setConstraints(b21, 2, 1, 1, 1, HPos.CENTER, VPos.CENTER);
         playGr.add(b22, 2, 2);
         GridPane.setConstraints(b22, 2, 2, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(msg, 2, 3);
-        GridPane.setConstraints(msg, 2, 3, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(mainmenu, 2, 4);
-        GridPane.setConstraints(mainmenu, 2, 4, 1, 1, HPos.CENTER, VPos.CENTER);
+        playGr.add(msg, 0, 3);
+        GridPane.setConstraints(msg, 0, 3, 3, 1, HPos.CENTER, VPos.CENTER);
+        playGr.add(mainmenu, 0, 4);
+        GridPane.setConstraints(mainmenu, 0, 4, 3, 5, HPos.CENTER, VPos.CENTER);
         //
         loadingSc = new Scene(loadingGr);
+        loadingSc.getStylesheets().add("TTTGui.css");
         playSc = new Scene(playGr);
+        playSc.getStylesheets().add("TTTGui.css");
         //
         //primaryStage.setFullScreenExitKeyCombination(new KeyCodeCombination(KeyCode.F11));
         primaryStage.setMinWidth(MINW);
@@ -97,36 +100,83 @@ public class TTTGui extends Application
         primaryStage.setMaxHeight(MAXH);
         primaryStage.setScene(loadingSc);
         primaryStage.setResizable(true);
+        handler = new TTTHandler(this);
+        handler.start();
+        primaryStage.setOnCloseRequest(e-> {
+            handler.interrupt();
+            System.exit(0);
+        });
         primaryStage.show();
     }
     public void buttonClick(ActionEvent e){
         if(e.getSource() == startx)
         {
-            
+            msg.setText("");
+            stage.setScene(playSc);
+            handler.addInstruction("start 1");
         }
         else if(e.getSource() == starto)
         {
-            
+            msg.setText("");
+            stage.setScene(playSc);
+            handler.addInstruction("start 2");
         }
         else if(e.getSource() == startr)
         {
-            
+            msg.setText("");
+            stage.setScene(playSc);
+            handler.addInstruction("start " + (int)(Math.random() * 2 + 1)); //Random side
         }
-        else
+        else if(e.getSource() == mainmenu)
+        {
+            stage.setScene(loadingSc);
+            //Clear game
+            msg.setText("");
+            for(Button[] barr : gridButtons)
+                for(Button b : barr)
+                    b.setText("");
+        }
+        else if(isTurn)
             for(int x = 0; x < 3; ++x)
                 for(int y = 0; y < 3; ++y)
                     if(e.getSource() == gridButtons[x][y])
                     {
-                        
+                        handler.addInstruction("place " + x + " " + y);
                     }
     }
     public void turnStart(boolean val){
+        isTurn = val;
         Platform.runLater(() -> {
             msg.setText(val ? "Your Turn!" : "Their Turn!");
         });
     }
     public void endGame(int winner)
     {
-    
+        String str = (winner == handler.ID) ? "You Won!" : (winner < 0 ? "It's a Tie!" : "You Lost!");
+        Platform.runLater(() -> {
+            msg.setText(str);
+        });
+    }
+    public void updateButtons(TTTBoard board)
+    {
+        Platform.runLater(() -> {
+            for(int x = 0; x < 3; ++x)
+                for(int y = 0; y < 3; ++y)
+                {
+                    Button b = gridButtons[x][y];
+                    switch(board.getSpace(x,y))
+                    {
+                        case 0:
+                            b.setText("");
+                            break;
+                        case 1:
+                            b.setText("X");
+                            break;
+                        case 2:
+                            b.setText("O");
+                            break;
+                    }
+                }
+        });
     }
 }
