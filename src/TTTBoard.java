@@ -61,4 +61,10 @@ public class TTTBoard
         }
         return true;
     }
+    
+    public static int oppositeID(int ID)
+    {
+        if(ID == X) return O;
+        else return X;
+    }
 }
