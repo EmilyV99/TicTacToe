@@ -1,5 +1,6 @@
 public class TTTBoard
 {
+    public static final int BLANK = 0, X = 1, O = 2;
     private int board[][] = new int[3][3]; //This is the board. `0` means blank, `1` means X, `2` means O. -V
     
     public TTTBoard(){}
