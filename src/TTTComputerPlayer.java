@@ -13,7 +13,7 @@ public class TTTComputerPlayer
 
     public void takeTurn()
     {
-		// MAKE A TURN LEFT AI 
+	
     }
 	//Take the AI's turn, using the `board` object.
 	//If you need a copy of the board to modify for some reason, you can do:
