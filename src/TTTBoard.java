@@ -24,9 +24,11 @@ public class TTTBoard
         board[x][y] = val;
     }
     
-    /*
-        Returns -1 if tie, 1 if X, 2 if O, or 0 if game is not over -V
-    */
+    /**
+     * Checks if someone has won the TTT game.
+     * 
+     * @return      -1 if tie, 1 if X, 2 if O, 0 if game continues
+     */
     public int checkWinner()
     {
         for(int x = 0; x < 3; ++x) //Check columns

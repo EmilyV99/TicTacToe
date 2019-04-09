@@ -1,8 +1,4 @@
 TODO:
-GUI (Rob)
-	Handler object
-		Queue for instruction processing
-	Buttons / Main Menu
-AI (Brian)
+AI
 	`void takeTurn()` - takes a turn
 	Difficulties - Last step, do everything else first!
