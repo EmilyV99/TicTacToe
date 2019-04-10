@@ -86,7 +86,7 @@ public class TTTBoardAnalyzer
             }
         
         int[] data = new int[3];
-        data[3] = INVALID;
+        data[2] = INVALID;
         for(int x = 0; x < 3; ++x)
             for(int y = 0; y < 3; ++y)
             {

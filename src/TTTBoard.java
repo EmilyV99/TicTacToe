@@ -4,14 +4,15 @@ public class TTTBoard
     private int board[][] = new int[3][3]; //This is the board. `0` means blank, `1` means X, `2` means O. -V
     
     public TTTBoard(){}
-    private TTTBoard(int board[][])
-    {
-        this.board = board.clone();
-    }
     
     public TTTBoard cloneBoard()
     {
-        return new TTTBoard(board);
+        TTTBoard dupe = new TTTBoard();
+        dupe.board = new int[3][3];
+        for(int x = 0; x < 3; ++x)
+            for(int y = 0; y < 3; ++y)
+                dupe.setSpace(x,y,board[x][y]);
+        return dupe;
     }
     
     public int getSpace(int x, int y)

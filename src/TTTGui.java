@@ -21,8 +21,9 @@ public class TTTGui extends Application
     Button[] buttons = new Button[]{startx, starto, startr, mainmenu};
     Button[][] gridButtons = new Button[][]{{b00, b01, b02},{b10, b11, b12},{b20, b21, b22}};
     Text msg = new Text();
+    ChoiceBox<String> diff = new ChoiceBox<>();
     volatile boolean isTurn = false;
-    TTTHandler handler;
+    volatile TTTHandler handler;
     public static void main(String[] args){
         launch();
     }
@@ -41,18 +42,11 @@ public class TTTGui extends Application
                 b.setId("gridb");
             }
         for(GridPane grid : grids){
-            //grid.setVgap(15);
-            //grid.setHgap(15);
             grid.setAlignment(Pos.CENTER);
             grid.setPadding(new Insets(20,20,20,20));
-            /*ColumnConstraints a = new ColumnConstraints();
-            a.setPercentWidth(20);
-            RowConstraints b = new RowConstraints();
-            b.setPercentHeight(20);
-            grid.getColumnConstraints().addAll(a,a,a,a,a);
-            grid.getRowConstraints().addAll(b,b,b,b,b);*/
-            //grid.setGridLinesVisible(true); //Debugging
         }
+        diff.getItems().addAll("Easy","Normal","Hard","Impossible");
+        diff.getSelectionModel().selectLast();
         //Loading scene
         loadingGr.add(startx, 0, 1);
         GridPane.setConstraints(startx, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
@@ -60,7 +54,10 @@ public class TTTGui extends Application
         GridPane.setConstraints(starto, 0, 2, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.add(startr, 0, 3);
         GridPane.setConstraints(startr, 0, 3, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(diff, 1, 2);
+        GridPane.setConstraints(diff, 1, 2, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.setVgap(25);
+        loadingGr.setHgap(25);
         //
         //Call scene
         playGr.add(b00, 0, 0);
@@ -113,19 +110,19 @@ public class TTTGui extends Application
         {
             msg.setText("");
             stage.setScene(playSc);
-            handler.addInstruction("start 1");
+            handler.addInstruction("start 1 " + diff.getValue());
         }
         else if(e.getSource() == starto)
         {
             msg.setText("");
             stage.setScene(playSc);
-            handler.addInstruction("start 2");
+            handler.addInstruction("start 2 " + diff.getValue());
         }
         else if(e.getSource() == startr)
         {
             msg.setText("");
             stage.setScene(playSc);
-            handler.addInstruction("start " + (int)(Math.random() * 2 + 1)); //Random side
+            handler.addInstruction("start " + (int)(Math.random() * 2 + 1) + " " + diff.getValue()); //Random side
         }
         else if(e.getSource() == mainmenu)
         {
@@ -135,6 +132,7 @@ public class TTTGui extends Application
             for(Button[] barr : gridButtons)
                 for(Button b : barr)
                     b.setText("");
+            handler.addInstruction("menu");
         }
         else if(isTurn)
             for(int x = 0; x < 3; ++x)
@@ -156,6 +154,13 @@ public class TTTGui extends Application
         Platform.runLater(() -> {
             msg.setText(str);
         });
+    }
+    public void handleCrash()
+    {
+        Platform.runLater(() -> {
+            msg.setText("ERROR!");
+        });
+        handler = new TTTHandler(this);
     }
     public void updateButtons(TTTBoard board)
     {

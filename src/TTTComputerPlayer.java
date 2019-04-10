@@ -1,19 +1,32 @@
 public class TTTComputerPlayer
 {
     private final int ID;
-    private final int opponentID;
-    private final TTTBoard board;
+    private TTTBoard board;
 
-    public TTTComputerPlayer(int ID, int opponentID, TTTBoard board)
+    public TTTComputerPlayer(int ID, TTTBoard board, String diff)
     {
         this.ID = ID;
-        this.opponentID = opponentID;
         this.board = board;
+        switch(diff.toLowerCase())
+        {
+            case "easy":
+                
+                break;
+            case "normal":
+                
+                break;
+            case "hard":
+                
+                break;
+            case "impossible":
+                
+                break;
+        }
     }
 
     public void takeTurn()
     {
-        int[] data = TTTBoardAnalyzer.analyzeBoard(board, ID);
+        int[] data = TTTBoardAnalyzer.analyzeBoard(board.cloneBoard(), ID);
         board.setSpace(data[0], data[1], ID);
     }
 		
@@ -22,11 +35,12 @@ public class TTTComputerPlayer
     //You can modify this however you like, this is just an example test.
     //When the AI is done (save for difficulty settings) this should ALWAYS end in a tie!
     //-V
+    /*
     public static void main(String[] args)
     {
         TTTBoard theboard = new TTTBoard();
-        TTTComputerPlayer AI1 = new TTTComputerPlayer(1, 2, theboard);
-        TTTComputerPlayer AI2 = new TTTComputerPlayer(2, 1, theboard);
+        TTTComputerPlayer AI1 = new TTTComputerPlayer(1, theboard);
+        TTTComputerPlayer AI2 = new TTTComputerPlayer(2, theboard);
         while(theboard.checkWinner() == 0)
         {
             AI1.takeTurn();
@@ -37,5 +51,5 @@ public class TTTComputerPlayer
         if(win < 0)
                 System.out.println("Tie! No one wins!");
         else System.out.println("The winner is: " + win);
-    }
+    }*/
 }
