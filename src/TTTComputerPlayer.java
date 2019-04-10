@@ -2,6 +2,7 @@ public class TTTComputerPlayer
 {
     private final int ID;
     private TTTBoard board;
+    private byte difficulty;
 
     public TTTComputerPlayer(int ID, TTTBoard board, String diff)
     {
@@ -10,24 +11,49 @@ public class TTTComputerPlayer
         switch(diff.toLowerCase())
         {
             case "easy":
-                
+                difficulty = 40;
                 break;
             case "normal":
-                
+                difficulty = 60;
                 break;
             case "hard":
-                
+                difficulty = 80;
                 break;
             case "impossible":
-                
+                difficulty = 100;
                 break;
         }
     }
 
     public void takeTurn()
     {
-        int[] data = TTTBoardAnalyzer.analyzeBoard(board.cloneBoard(), ID);
-        board.setSpace(data[0], data[1], ID);
+        if(((int)(Math.random() * 100) + 1) <= difficulty)
+        {
+            int[] data = TTTBoardAnalyzer.analyzeBoard(board.cloneBoard(), ID);
+            board.setSpace(data[0], data[1], ID);
+        }
+        else
+        {
+            int numblanks = 0;
+            for(int x = 0; x < 3; ++x)
+                for(int y = 0; y < 3; ++y)
+                    if(board.getSpace(x,y) == TTTBoard.BLANK) ++numblanks;
+            int choice = ((int)(Math.random() * numblanks) + 1);
+            numblanks = 0;
+            for(int x = 0; x < 3; ++x)
+                for(int y = 0; y < 3; ++y)
+                {
+                    if(board.getSpace(x,y) == TTTBoard.BLANK)
+                    {
+                        ++numblanks;
+                        if(numblanks == choice)
+                        {
+                            board.setSpace(x, y, ID);
+                            return;
+                        }
+                    }
+                }
+        }
     }
 		
     //Driver method. This will not exist in the final form of the project.
