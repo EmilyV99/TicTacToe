@@ -7,6 +7,9 @@ import javafx.stage.*;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.*;
 import javafx.application.Platform;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
 
 public class TTTGui extends Application
 {
@@ -24,6 +27,7 @@ public class TTTGui extends Application
     ChoiceBox<String> diff = new ChoiceBox<>();
     volatile boolean isTurn = false;
     volatile TTTHandler handler;
+    Background background = new Background(new BackgroundImage(new Image("BG1.png"),null,null,null,null));
     public static void main(String[] args){
         launch();
     }
@@ -48,6 +52,7 @@ public class TTTGui extends Application
         diff.getItems().addAll("Easy","Normal","Hard","Impossible");
         diff.getSelectionModel().selectLast();
         //Loading scene
+        loadingGr.setBackground(background);
         loadingGr.add(startx, 0, 1);
         GridPane.setConstraints(startx, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.add(starto, 0, 2);
@@ -60,6 +65,7 @@ public class TTTGui extends Application
         loadingGr.setHgap(25);
         //
         //Call scene
+        playGr.setBackground(background);
         playGr.add(b00, 0, 0);
         GridPane.setConstraints(b00, 0, 0, 1, 1, HPos.CENTER, VPos.CENTER);
         playGr.add(b01, 0, 1);
