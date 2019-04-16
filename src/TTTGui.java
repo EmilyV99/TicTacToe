@@ -32,7 +32,8 @@ public class TTTGui extends Application
                                             {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
                                             {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
                                             {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()}};
-    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty");
+    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), timeText = new Text("Time Limit");
+    TextField timeLimit = new TextField("30");
     ChoiceBox<String> diff = new ChoiceBox<>();
     ChoiceBox<Integer> sizeSelector = new ChoiceBox<>(), recLimit = new ChoiceBox<>();
     volatile boolean isTurn = false;
@@ -59,6 +60,11 @@ public class TTTGui extends Application
             grid.setAlignment(Pos.CENTER);
             grid.setPadding(new Insets(20,20,20,20));
         }
+        msg.setId("text");
+        rltext.setId("text");
+        siztext.setId("text");
+        difftext.setId("text"); 
+        timeText.setId("text");
         diff.getItems().addAll("Easy","Normal","Hard","Impossible");
         diff.getSelectionModel().selectLast();
         sizeSelector.getItems().addAll(3,4,5,6,7,8);
@@ -84,6 +90,10 @@ public class TTTGui extends Application
         GridPane.setConstraints(diff, 2, 1, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.add(difftext, 2, 1);
         GridPane.setConstraints(difftext, 2, 1, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.add(timeLimit, 0, 1);
+        GridPane.setConstraints(timeLimit, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(timeText, 0, 1);
+        GridPane.setConstraints(timeText, 0, 1, 1, 1, HPos.CENTER, VPos.TOP);
         loadingGr.setBackground(background);
         loadingGr.setVgap(25);
         loadingGr.setHgap(25);
@@ -109,10 +119,8 @@ public class TTTGui extends Application
         primaryStage.setMaxHeight(MAXH);
         primaryStage.setScene(loadingSc);
         primaryStage.setResizable(true);
-        handler = new TTTHandler(this);
-        handler.start();
         primaryStage.setOnCloseRequest(e-> {
-            handler.interrupt();
+            if(handler != null) handler.interrupt();
             System.exit(0);
         });
         primaryStage.show();
@@ -122,26 +130,26 @@ public class TTTGui extends Application
         {
             msg.setText("");
             stage.setScene(playSc);
-            openGrid("start 1 " + diff.getValue() + " ");
+            openGrid(1, diff.getValue());
         }
         else if(e.getSource() == starto)
         {
             msg.setText("");
             stage.setScene(playSc);
-            openGrid("start 2 " + diff.getValue() + " ");
+            openGrid(2, diff.getValue());
         }
         else if(e.getSource() == startr)
         {
             msg.setText("");
             stage.setScene(playSc);
-            openGrid("start " + (int)(Math.random() * 2 + 1) + " " + diff.getValue() + " ");
+            openGrid((int)(Math.random() * 2 + 1), diff.getValue());
         }
         else if(e.getSource() == mainmenu)
         {
             stage.setScene(loadingSc);
             //Clear game
             msg.setText("");
-            handler.interrupt();
+            handler = null;
         }
         else if(isTurn)
             for(int x = 0; x < MAX_SIZE; ++x)
@@ -152,7 +160,7 @@ public class TTTGui extends Application
                     }
     }
     
-    public void openGrid(String instruction)
+    public void openGrid(int ID, String diff)
     {
         int size = sizeSelector.getValue();
         playGr.getChildren().removeAll(playGr.getChildren());
@@ -169,7 +177,15 @@ public class TTTGui extends Application
         playGr.add(mainmenu, 0, size + 1);
         GridPane.setConstraints(mainmenu, 0, size + 1, size, 1, HPos.CENTER, VPos.CENTER);
         playGr.setBackground(background);
-        handler.addInstruction(instruction + size + " " + recLimit.getValue());
+        long time = 30000L;
+        try
+        {
+            time = (long)(Double.parseDouble(timeLimit.getCharacters().toString()) * 1000.0);
+            if(TTTBoard.DEBUG) System.err.println("Time limit: " + (time/1000.0) + " seconds");
+        }
+        catch(NumberFormatException ignored){}
+        handler = new TTTHandler(this, ID, diff, size, recLimit.getValue(), time);
+        handler.start();
     }
     
     public void turnStart(boolean val)
@@ -195,9 +211,10 @@ public class TTTGui extends Application
     public void handleCrash()
     {
         Platform.runLater(() -> {
-            msg.setText("ERROR!");
+            stage.setScene(loadingSc);
+            msg.setText("");
+            handler = null;
         });
-        handler = new TTTHandler(this);
     }
     public void updateButtons(TTTBoard board)
     {

@@ -5,10 +5,10 @@ public class TTTBoardAnalyzer
     
     public static int[] analyzeBoard(TTTBoard board, int ID)
     {
-        return analyzeBoard(board, ID, XVAL, OVAL, 0);
+        return analyzeBoard(board, ID, XVAL, OVAL, 0, System.currentTimeMillis());
     }
     
-    private static int[] analyzeBoard(TTTBoard board, int ID, int min, int max, int recDepth)
+    private static int[] analyzeBoard(TTTBoard board, int ID, int min, int max, int recDepth, long starttime)
     {
         if(Thread.interrupted()) throw new TTTException("Game exiting to main menu!");
         boolean minimize = ID == TTTBoard.X;
@@ -74,8 +74,8 @@ public class TTTBoardAnalyzer
                         heuristics[x][y] = OVAL;
                         break;
                     case TTTBoard.BLANK:
-                        if(recDepth <= board.getRecLimit())
-                            heuristics[x][y] = analyzeBoard(temp, TTTBoard.oppositeID(ID), minimize ? XVAL : min, minimize ? max : OVAL, recDepth + 1)[2];
+                        if(recDepth <= board.getRecLimit() && (System.currentTimeMillis() - starttime) < board.getTimeLimit())
+                            heuristics[x][y] = analyzeBoard(temp, TTTBoard.oppositeID(ID), minimize ? XVAL : min, minimize ? max : OVAL, recDepth + 1, starttime)[2];
                         else
                             heuristics[x][y] = quickAnalyze(temp);
                         if(prune)
@@ -140,7 +140,7 @@ public class TTTBoardAnalyzer
                     case TTTBoard.BLANK: ++bval; break;
                 }
             }
-            retval += (oval - xval) * ((oval + xval) / (double)(size*size));
+            retval += checkVal(oval, xval, bval);
         }
         //Check rows
         for(int y = 0; y < size; ++y)
@@ -155,7 +155,7 @@ public class TTTBoardAnalyzer
                     case TTTBoard.BLANK: ++bval; break;
                 }
             }
-            retval += (oval - xval) * ((oval + xval) / (double)(size*size));
+            retval += checkVal(oval, xval, bval);
         }
         //Check diagonals
         //Up-Left to Down-Right
@@ -171,7 +171,7 @@ public class TTTBoardAnalyzer
             }
             ++x; ++y;
         }
-        retval += (oval - xval) * ((oval + xval) / (double)(size*size));
+        retval += checkVal(oval, xval, bval);
         xval = 0; oval = 0; bval = 0;
         //Up-Right to Down-Left
         x = size - 1;
@@ -186,7 +186,15 @@ public class TTTBoardAnalyzer
             }
             --x; ++y;
         }
-        retval += (oval - xval) * ((oval + xval) / (double)(size*size));
+        retval += checkVal(oval, xval, bval);
         return retval;
+    }
+    
+    private static int checkVal(int oval, int xval, int bval)
+    {
+        //If the line is not blocked for the given player, give it additional weighting.
+        if(oval == 0) return -5 * xval;
+        if(xval == 0) return 5 * oval;
+        return (oval - xval);
     }
 }

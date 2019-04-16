@@ -8,43 +8,38 @@ public class TTTHandler extends Thread
     private TTTComputerPlayer AI;
     int ID;
     private volatile LinkedList<String> instructions = new LinkedList<>();
-    public TTTHandler(TTTGui client){
+    public TTTHandler(TTTGui client, int ID, String difficulty, int size, int reclimit, long timeLimit){
         this.client = client;
+        this.ID = ID;
+        this.board = new TTTBoard(size, reclimit, timeLimit);
+        this.AI = new TTTComputerPlayer(TTTBoard.oppositeID(ID), board, difficulty);
     }
     public void run()
     {
         try
         {
-            while(!this.isInterrupted())
+            //while(board == null) takeClientTurn(false);
+            for(boolean humanTurn = ID == TTTBoard.X; board.checkWinner()==0; humanTurn = !humanTurn) //Alternate X and O
             {
-                try
+                if(humanTurn)
+                    takeClientTurn(true);
+                else
                 {
-                    while(board == null) takeClientTurn(false);
-                    if(this.isInterrupted()) throw new InterruptedException();
-                    for(boolean humanTurn = ID == TTTBoard.X; board.checkWinner()==0; humanTurn = !humanTurn) //Alternate X and O
+                    if(TTTBoard.DEBUG)
                     {
-                        if(humanTurn)
-                            takeClientTurn(true);
-                        else
-                        {
-                            if(TTTBoard.DEBUG)
-                            {
-                                long stime = System.currentTimeMillis();
-                                AI.takeTurn();
-                                System.err.println("AI turn took: " + ((System.currentTimeMillis() - stime)/1000.0) + " seconds");
-                            }
-                            else AI.takeTurn();
-                        } 
-                        client.updateButtons(board);
+                        long stime = System.currentTimeMillis();
+                        AI.takeTurn();
+                        System.err.println("AI turn took: " + ((System.currentTimeMillis() - stime)/1000.0) + " seconds");
                     }
-                    client.endGame(board.checkWinner());
-                }
-                catch(TTTException | InterruptedException e)
-                {
-                    if(!(e instanceof InterruptedException || e.getMessage().equals("Game exiting to main menu!"))) throw e;
-                }
-                board = null; AI = null; ID = 0; instructions.clear();
+                    else AI.takeTurn();
+                } 
+                client.updateButtons(board);
             }
+            client.endGame(board.checkWinner());
+        }
+        catch(TTTException e)
+        {
+            if(!e.getMessage().equals("Game exiting to main menu!")) throw e;
         }
         catch(Exception e)
         {
@@ -89,12 +84,6 @@ public class TTTHandler extends Thread
                             return;
                         }
                         break;
-                    case "start":
-                        if(isGameTurn) break;
-                        ID = Integer.parseInt(params[0]);
-                        board = new TTTBoard(Integer.parseInt(params[2]), Integer.parseInt(params[3]));
-                        AI = new TTTComputerPlayer(TTTBoard.oppositeID(ID), board, params[1]);
-                        return;
                 }
             }
         }

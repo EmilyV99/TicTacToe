@@ -4,17 +4,19 @@ public class TTTBoard
     public static final boolean DEBUG = true;
     private int board[][]; //This is the board. `0` means blank, `1` means X, `2` means O. -V
     private final int size, reclimit;
+    private final long timeLimit;
     
-    public TTTBoard(int size, int reclimit)
+    public TTTBoard(int size, int reclimit, long timeLimit)
     {
         this.board = new int[size][size];
         this.size = size;
         this.reclimit = reclimit;
+        this.timeLimit = timeLimit;
     }
     
     public TTTBoard cloneBoard()
     {
-        TTTBoard dupe = new TTTBoard(size, reclimit);
+        TTTBoard dupe = new TTTBoard(size, reclimit, timeLimit);
         dupe.board = new int[size][size];
         for(int x = 0; x < size; ++x)
             for(int y = 0; y < size; ++y)
@@ -39,6 +41,11 @@ public class TTTBoard
         return reclimit;
     }
     
+    public long getTimeLimit()
+    {
+        return timeLimit;
+    }
+    
     /**
      * Checks if someone has won the TTT game.
      * 
@@ -50,6 +57,7 @@ public class TTTBoard
         for(int x = 0; x < size; ++x)
         {
             int val = board[x][0];
+            if(val==0)continue;
             for(int y = 1; y < size; ++y)
             {
                 if(board[x][y] != val)
@@ -64,6 +72,7 @@ public class TTTBoard
         for(int y = 0; y < size; ++y)
         {
             int val = board[0][y];
+            if(val==0)continue;
             for(int x = 1; x < size; ++x)
             {
                 if(board[x][y] != val)
@@ -78,30 +87,36 @@ public class TTTBoard
         //Up-Left to Down-Right
         int x = 1, y = 1;
         int val = board[0][0];
-        while(x < size)
+        if(val!=0)
         {
-            if(board[x][y] != val)
+            while(x < size)
             {
-                val = -1;
-                break;
+                if(board[x][y] != val)
+                {
+                    val = -1;
+                    break;
+                }
+                ++x; ++y;
             }
-            ++x; ++y;
+            if(val!=-1) return val;
         }
-        if(val!=-1) return val;
         //Up-Right to Down-Left
         x = size - 2;
         y = 1;
         val = board[size-1][0];
-        while(y < size)
+        if(val!=0)
         {
-            if(board[x][y] != val)
+            while(y < size)
             {
-                val = -1;
-                break;
+                if(board[x][y] != val)
+                {
+                    val = -1;
+                    break;
+                }
+                --x; ++y;
             }
-            --x; ++y;
+            if(val!=-1) return val;
         }
-        if(val!=-1) return val;
         
         return isFull() ? -1 : 0; //-1 if game is over in a tie, 0 if ongoing
     }

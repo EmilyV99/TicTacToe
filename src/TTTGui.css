@@ -4,3 +4,7 @@
     -fx-fill: #FFF;
     -fx-font-weight: bold;
 }
+
+#text {
+    -fx-font-weight: bold;
+}
