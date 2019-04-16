@@ -9,6 +9,9 @@ import javafx.geometry.*;
 import javafx.application.Platform;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
 
 public class TTTGui extends Application
 {
@@ -34,6 +37,7 @@ public class TTTGui extends Application
     ChoiceBox<Integer> sizeSelector = new ChoiceBox<>(), recLimit = new ChoiceBox<>();
     volatile boolean isTurn = false;
     volatile TTTHandler handler;
+    Background background = new Background(new BackgroundImage(new Image("BG1.png"),null,null,null,null));
     public static void main(String[] args){
         launch();
     }
@@ -80,6 +84,7 @@ public class TTTGui extends Application
         GridPane.setConstraints(diff, 2, 1, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.add(difftext, 2, 1);
         GridPane.setConstraints(difftext, 2, 1, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.setBackground(background);
         loadingGr.setVgap(25);
         loadingGr.setHgap(25);
         ColumnConstraints c = new ColumnConstraints(100);
@@ -163,6 +168,7 @@ public class TTTGui extends Application
         GridPane.setConstraints(msg, 0, size, size, 1, HPos.CENTER, VPos.CENTER);
         playGr.add(mainmenu, 0, size + 1);
         GridPane.setConstraints(mainmenu, 0, size + 1, size, 1, HPos.CENTER, VPos.CENTER);
+        playGr.setBackground(background);
         handler.addInstruction(instruction + size + " " + recLimit.getValue());
     }
     
