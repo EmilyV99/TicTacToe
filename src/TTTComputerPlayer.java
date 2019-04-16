@@ -1,6 +1,6 @@
 public class TTTComputerPlayer
 {
-    private final int ID;
+    private final int ID, size;
     private TTTBoard board;
     private byte difficulty;
 
@@ -8,6 +8,7 @@ public class TTTComputerPlayer
     {
         this.ID = ID;
         this.board = board;
+        this.size = board.getSize();
         switch(diff.toLowerCase())
         {
             case "easy":
@@ -35,13 +36,13 @@ public class TTTComputerPlayer
         else
         {
             int numblanks = 0;
-            for(int x = 0; x < 3; ++x)
-                for(int y = 0; y < 3; ++y)
+            for(int x = 0; x < size; ++x)
+                for(int y = 0; y < size; ++y)
                     if(board.getSpace(x,y) == TTTBoard.BLANK) ++numblanks;
             int choice = ((int)(Math.random() * numblanks) + 1);
             numblanks = 0;
-            for(int x = 0; x < 3; ++x)
-                for(int y = 0; y < 3; ++y)
+            for(int x = 0; x < size; ++x)
+                for(int y = 0; y < size; ++y)
                 {
                     if(board.getSpace(x,y) == TTTBoard.BLANK)
                     {

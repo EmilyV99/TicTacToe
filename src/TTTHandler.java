@@ -20,19 +20,28 @@ public class TTTHandler extends Thread
                 try
                 {
                     while(board == null) takeClientTurn(false);
-                    if(this.isInterrupted()) return;
+                    if(this.isInterrupted()) throw new InterruptedException();
                     for(boolean humanTurn = ID == TTTBoard.X; board.checkWinner()==0; humanTurn = !humanTurn) //Alternate X and O
                     {
                         if(humanTurn)
                             takeClientTurn(true);
-                        else AI.takeTurn(); 
+                        else
+                        {
+                            if(TTTBoard.DEBUG)
+                            {
+                                long stime = System.currentTimeMillis();
+                                AI.takeTurn();
+                                System.err.println("AI turn took: " + ((System.currentTimeMillis() - stime)/1000.0) + " seconds");
+                            }
+                            else AI.takeTurn();
+                        } 
                         client.updateButtons(board);
                     }
                     client.endGame(board.checkWinner());
                 }
-                catch(TTTException e)
+                catch(TTTException | InterruptedException e)
                 {
-                    if(!e.getMessage().equals("Game exiting to main menu!")) throw e;
+                    if(!(e instanceof InterruptedException || e.getMessage().equals("Game exiting to main menu!"))) throw e;
                 }
                 board = null; AI = null; ID = 0; instructions.clear();
             }
@@ -83,11 +92,9 @@ public class TTTHandler extends Thread
                     case "start":
                         if(isGameTurn) break;
                         ID = Integer.parseInt(params[0]);
-                        board = new TTTBoard();
+                        board = new TTTBoard(Integer.parseInt(params[2]), Integer.parseInt(params[3]));
                         AI = new TTTComputerPlayer(TTTBoard.oppositeID(ID), board, params[1]);
                         return;
-                    case "menu":
-                        throw new TTTException("Game exiting to main menu!");
                 }
             }
         }

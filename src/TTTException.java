@@ -1,4 +1,4 @@
-public class TTTException extends Exception
+public class TTTException extends RuntimeException
 {
     public TTTException(String msg){
         super(msg);
