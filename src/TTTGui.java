@@ -7,11 +7,16 @@ import javafx.stage.*;
 import javafx.scene.layout.GridPane;
 import javafx.geometry.*;
 import javafx.application.Platform;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.RowConstraints;
+import javafx.scene.image.Image;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundImage;
 
 public class TTTGui extends Application
 {
-    static final int MINW = 300, MINH = 300, DEFW = 350, DEFH = 350, MAXW = 400, MAXH = 400, //Window size
-            BTN_W = 60, BTN_H = BTN_W;
+    static final int MINW = 500, MINH = 500, DEFW = 600, DEFH = 600, MAXW = 600, MAXH = 600, //Window size
+            BTN_W = 60, BTN_H = BTN_W, MAX_SIZE = 8;
     Stage stage;//Stage object
     Scene loadingSc, playSc;
     GridPane loadingGr = new GridPane(), playGr = new GridPane();
@@ -19,11 +24,21 @@ public class TTTGui extends Application
     Button startx = new Button("Start (X)"), starto = new Button("Start (O)"), startr = new Button("Start (random)"), b00 = new Button(), b01 = new Button(), b02 = new Button(), b10 = new Button(),
             b11 = new Button(), b12 = new Button(), b20 = new Button(), b21 = new Button(), b22 = new Button(), mainmenu = new Button("Main Menu");
     Button[] buttons = new Button[]{startx, starto, startr, mainmenu};
-    Button[][] gridButtons = new Button[][]{{b00, b01, b02},{b10, b11, b12},{b20, b21, b22}};
-    Text msg = new Text();
+    Button[][] gridButtons = new Button[][]{{new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
+                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()}};
+    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), timeText = new Text("Time Limit");
+    TextField timeLimit = new TextField("30");
     ChoiceBox<String> diff = new ChoiceBox<>();
+    ChoiceBox<Integer> sizeSelector = new ChoiceBox<>(), recLimit = new ChoiceBox<>();
     volatile boolean isTurn = false;
     volatile TTTHandler handler;
+    Background background = new Background(new BackgroundImage(new Image("BG1.png"),null,null,null,null));
     public static void main(String[] args){
         launch();
     }
@@ -45,43 +60,50 @@ public class TTTGui extends Application
             grid.setAlignment(Pos.CENTER);
             grid.setPadding(new Insets(20,20,20,20));
         }
+        msg.setId("text");
+        rltext.setId("text");
+        siztext.setId("text");
+        difftext.setId("text"); 
+        timeText.setId("text");
         diff.getItems().addAll("Easy","Normal","Hard","Impossible");
         diff.getSelectionModel().selectLast();
+        sizeSelector.getItems().addAll(3,4,5,6,7,8);
+        sizeSelector.getSelectionModel().selectFirst();
+        recLimit.getItems().addAll(4,5,6,7,8,9,10);
+        recLimit.getSelectionModel().select(5);
         //Loading scene
-        loadingGr.add(startx, 0, 1);
-        GridPane.setConstraints(startx, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
-        loadingGr.add(starto, 0, 2);
-        GridPane.setConstraints(starto, 0, 2, 1, 1, HPos.CENTER, VPos.CENTER);
-        loadingGr.add(startr, 0, 3);
-        GridPane.setConstraints(startr, 0, 3, 1, 1, HPos.CENTER, VPos.CENTER);
-        loadingGr.add(diff, 1, 2);
-        GridPane.setConstraints(diff, 1, 2, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(siztext, 0, 2);
+        GridPane.setConstraints(siztext, 0, 2, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.add(sizeSelector, 0, 2);
+        GridPane.setConstraints(sizeSelector, 0, 2, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(rltext, 2, 2);
+        GridPane.setConstraints(rltext, 2, 2, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.add(recLimit, 2, 2);
+        GridPane.setConstraints(recLimit, 2, 2, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(startx, 1, 0);
+        GridPane.setConstraints(startx, 1, 0, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(starto, 1, 1);
+        GridPane.setConstraints(starto, 1, 1, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(startr, 1, 2);
+        GridPane.setConstraints(startr, 1, 2, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(diff, 2, 1);
+        GridPane.setConstraints(diff, 2, 1, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(difftext, 2, 1);
+        GridPane.setConstraints(difftext, 2, 1, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.add(timeLimit, 0, 1);
+        GridPane.setConstraints(timeLimit, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
+        loadingGr.add(timeText, 0, 1);
+        GridPane.setConstraints(timeText, 0, 1, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.setBackground(background);
         loadingGr.setVgap(25);
         loadingGr.setHgap(25);
+        ColumnConstraints c = new ColumnConstraints(100);
+        RowConstraints r = new RowConstraints(75);
+        loadingGr.getColumnConstraints().addAll(c, c, c);
+        loadingGr.getRowConstraints().addAll(r, r, r, r);
         //
         //Call scene
-        playGr.add(b00, 0, 0);
-        GridPane.setConstraints(b00, 0, 0, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b01, 0, 1);
-        GridPane.setConstraints(b01, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b02, 0, 2);
-        GridPane.setConstraints(b02, 0, 2, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b10, 1, 0);
-        GridPane.setConstraints(b10, 1, 0, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b11, 1, 1);
-        GridPane.setConstraints(b11, 1, 1, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b12, 1, 2);
-        GridPane.setConstraints(b12, 1, 2, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b20, 2, 0);
-        GridPane.setConstraints(b20, 2, 0, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b21, 2, 1);
-        GridPane.setConstraints(b21, 2, 1, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(b22, 2, 2);
-        GridPane.setConstraints(b22, 2, 2, 1, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(msg, 0, 3);
-        GridPane.setConstraints(msg, 0, 3, 3, 1, HPos.CENTER, VPos.CENTER);
-        playGr.add(mainmenu, 0, 4);
-        GridPane.setConstraints(mainmenu, 0, 4, 3, 5, HPos.CENTER, VPos.CENTER);
+        //Grid needs to be built each time a game is started, to accomodate multiple grid 
         //
         loadingSc = new Scene(loadingGr);
         loadingSc.getStylesheets().add("TTTGui.css");
@@ -97,10 +119,8 @@ public class TTTGui extends Application
         primaryStage.setMaxHeight(MAXH);
         primaryStage.setScene(loadingSc);
         primaryStage.setResizable(true);
-        handler = new TTTHandler(this);
-        handler.start();
         primaryStage.setOnCloseRequest(e-> {
-            handler.interrupt();
+            if(handler != null) handler.interrupt();
             System.exit(0);
         });
         primaryStage.show();
@@ -110,44 +130,77 @@ public class TTTGui extends Application
         {
             msg.setText("");
             stage.setScene(playSc);
-            handler.addInstruction("start 1 " + diff.getValue());
+            openGrid(1, diff.getValue());
         }
         else if(e.getSource() == starto)
         {
             msg.setText("");
             stage.setScene(playSc);
-            handler.addInstruction("start 2 " + diff.getValue());
+            openGrid(2, diff.getValue());
         }
         else if(e.getSource() == startr)
         {
             msg.setText("");
             stage.setScene(playSc);
-            handler.addInstruction("start " + (int)(Math.random() * 2 + 1) + " " + diff.getValue()); //Random side
+            openGrid((int)(Math.random() * 2 + 1), diff.getValue());
         }
         else if(e.getSource() == mainmenu)
         {
             stage.setScene(loadingSc);
             //Clear game
             msg.setText("");
-            for(Button[] barr : gridButtons)
-                for(Button b : barr)
-                    b.setText("");
-            handler.addInstruction("menu");
+            handler = null;
         }
         else if(isTurn)
-            for(int x = 0; x < 3; ++x)
-                for(int y = 0; y < 3; ++y)
+            for(int x = 0; x < MAX_SIZE; ++x)
+                for(int y = 0; y < MAX_SIZE; ++y)
                     if(e.getSource() == gridButtons[x][y])
                     {
                         handler.addInstruction("place " + x + " " + y);
                     }
     }
-    public void turnStart(boolean val){
+    
+    public void openGrid(int ID, String diff)
+    {
+        int size = sizeSelector.getValue();
+        playGr.getChildren().removeAll(playGr.getChildren());
+        for(int x = 0; x < size; ++x)
+            for(int y = 0; y < size; ++y)
+            {
+                Button b = gridButtons[x][y];
+                b.setText("");
+                playGr.add(b, x, y);
+                GridPane.setConstraints(b, x, y, 1, 1, HPos.CENTER, VPos.CENTER);
+            }
+        playGr.add(msg, 0, size);
+        GridPane.setConstraints(msg, 0, size, size, 1, HPos.CENTER, VPos.CENTER);
+        playGr.add(mainmenu, 0, size + 1);
+        GridPane.setConstraints(mainmenu, 0, size + 1, size, 1, HPos.CENTER, VPos.CENTER);
+        playGr.setBackground(background);
+        long time = 30000L;
+        try
+        {
+            time = (long)(Double.parseDouble(timeLimit.getCharacters().toString()) * 1000.0);
+            if(TTTBoard.DEBUG) System.err.println("Time limit: " + (time/1000.0) + " seconds");
+        }
+        catch(NumberFormatException ignored){}
+        handler = new TTTHandler(this, ID, diff, size, recLimit.getValue(), time);
+        handler.start();
+    }
+    
+    public void turnStart(boolean val)
+    {
         isTurn = val;
+        setText(val ? "Your Turn!" : "Thinking...");
+    }
+    
+    public void setText(String str)
+    {
         Platform.runLater(() -> {
-            msg.setText(val ? "Your Turn!" : "Their Turn!");
+            msg.setText(str);
         });
     }
+    
     public void endGame(int winner)
     {
         String str = (winner == handler.ID) ? "You Won!" : (winner < 0 ? "It's a Tie!" : "You Lost!");
@@ -158,28 +211,37 @@ public class TTTGui extends Application
     public void handleCrash()
     {
         Platform.runLater(() -> {
-            msg.setText("ERROR!");
+            stage.setScene(loadingSc);
+            msg.setText("");
+            handler = null;
         });
-        handler = new TTTHandler(this);
     }
     public void updateButtons(TTTBoard board)
     {
         Platform.runLater(() -> {
-            for(int x = 0; x < 3; ++x)
-                for(int y = 0; y < 3; ++y)
+            for(int x = 0; x < MAX_SIZE; ++x)
+                for(int y = 0; y < MAX_SIZE; ++y)
                 {
                     Button b = gridButtons[x][y];
-                    switch(board.getSpace(x,y))
+                    try
                     {
-                        case 0:
-                            b.setText("");
-                            break;
-                        case 1:
-                            b.setText("X");
-                            break;
-                        case 2:
-                            b.setText("O");
-                            break;
+                        switch(board.getSpace(x,y))
+                        {
+                            case 0:
+                                b.setText("");
+                                break;
+                            case 1:
+                                b.setText("X");
+                                break;
+                            case 2:
+                                b.setText("O");
+                                break;
+                        }
+                    }
+                    catch(TTTException e)
+                    {
+                        if(!e.getMessage().equals("Out of Bounds button!")) throw e;
+                        b.setText("");
                     }
                 }
         });
