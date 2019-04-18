@@ -1,4 +1,0 @@
-TODO:
-AI
-	`void takeTurn()` - takes a turn
-	Difficulties - Last step, do everything else first!

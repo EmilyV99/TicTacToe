@@ -138,6 +138,67 @@ public class TTTBoard
         return size;
     }
     
+    public boolean isGuaranteedTie()
+    {
+        //Check columns
+        for(int x = 0; x < size; ++x)
+        {
+            int xval = 0, oval = 0;
+            for(int y = 0; y < size; ++y)
+            {
+                switch(board[x][y])
+                {
+                    case X: ++xval; break;
+                    case O: ++oval; break;
+                }
+            }
+            if(xval == 0 || oval == 0) return false;
+        }
+        //Check rows
+        for(int y = 0; y < size; ++y)
+        {
+            int xval = 0, oval = 0;
+            for(int x = 0; x < size; ++x)
+            {
+                switch(board[x][y])
+                {
+                    case X: ++xval; break;
+                    case O: ++oval; break;
+                }
+            }
+            if(xval == 0 || oval == 0) return false;
+        }
+        //Check diagonals
+        //Up-Left to Down-Right
+        int xval = 0, oval = 0;
+        int x = 0, y = 0;
+        while(x < size)
+        {
+            switch(board[x][y])
+            {
+                case X: ++xval; break;
+                case O: ++oval; break;
+            }
+            ++x; ++y;
+        }
+        if(xval == 0 || oval == 0) return false;
+        xval = 0; oval = 0;
+        //Up-Right to Down-Left
+        x = size - 1;
+        y = 0;
+        while(y < size)
+        {
+            switch(board[x][y])
+            {
+                case X: ++xval; break;
+                case O: ++oval; break;
+            }
+            --x; ++y;
+        }
+        if(xval == 0 || oval == 0) return false;
+        return true;
+    }
+    
     public static int oppositeID(int ID)
     {
         if(ID == X) return O;

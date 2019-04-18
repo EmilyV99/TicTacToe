@@ -5,20 +5,21 @@ public class TTTBoardAnalyzer
     
     public static int[] analyzeBoard(TTTBoard board, int ID)
     {
-        return analyzeBoard(board, ID, XVAL, OVAL, 0, System.currentTimeMillis());
+        return analyzeBoard(board, ID, XVAL, OVAL, 0, System.currentTimeMillis(), board.isGuaranteedTie());
     }
     
-    private static int[] analyzeBoard(TTTBoard board, int ID, int min, int max, int recDepth, long starttime)
+    private static int[] analyzeBoard(TTTBoard board, int ID, int min, int max, int recDepth, long starttime, boolean isTie)
     {
         if(Thread.interrupted()) throw new TTTException("Game exiting to main menu!");
         boolean minimize = ID == TTTBoard.X;
         int size = board.getSize();
         int[][] heuristics = new int[size][size];
-        boolean pruned = false;
+        boolean pruned = false, foundOne = false;
+        //System.out.println(isTie);
         for(int x = 0; x < size; ++x)
             for(int y = 0; y < size; ++y)
             {
-                if(board.getSpace(x,y) != TTTBoard.BLANK || pruned)
+                if(board.getSpace(x,y) != TTTBoard.BLANK || pruned || (isTie && foundOne))
                 {
                     heuristics[x][y] = INVALID;
                     continue;
@@ -42,6 +43,7 @@ public class TTTBoardAnalyzer
                             }
                         }
                         heuristics[x][y] = TIEVAL;
+                        foundOne = true;
                         break;
                     case TTTBoard.X:
                         if(prune)
@@ -57,6 +59,7 @@ public class TTTBoardAnalyzer
                             }
                         }
                         heuristics[x][y] = XVAL;
+                        foundOne = true;
                         break;
                     case TTTBoard.O:
                         if(prune)
@@ -72,10 +75,11 @@ public class TTTBoardAnalyzer
                             }
                         }
                         heuristics[x][y] = OVAL;
+                        foundOne = true;
                         break;
                     case TTTBoard.BLANK:
-                        if(recDepth <= board.getRecLimit() && (System.currentTimeMillis() - starttime) < board.getTimeLimit())
-                            heuristics[x][y] = analyzeBoard(temp, TTTBoard.oppositeID(ID), minimize ? XVAL : min, minimize ? max : OVAL, recDepth + 1, starttime)[2];
+                        if(recDepth <= board.getRecLimit() && (System.currentTimeMillis() - starttime) < board.getTimeLimit() && !isTie)
+                            heuristics[x][y] = analyzeBoard(temp, TTTBoard.oppositeID(ID), minimize ? XVAL : min, minimize ? max : OVAL, recDepth + 1, starttime, temp.isGuaranteedTie())[2];
                         else
                             heuristics[x][y] = quickAnalyze(temp);
                         if(prune)
@@ -90,6 +94,7 @@ public class TTTBoardAnalyzer
                                     pruned = true;
                             }
                         }
+                        foundOne = true;
                         break;
                 }
             }
