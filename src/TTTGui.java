@@ -32,13 +32,14 @@ public class TTTGui extends Application
                                             {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
                                             {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
                                             {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()}};
-    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), timeText = new Text("Time Limit");
+    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), img = new Text("Image Selection"),timeText = new Text("Time Limit");
     TextField timeLimit = new TextField("30");
     ChoiceBox<String> diff = new ChoiceBox<>();
     ChoiceBox<Integer> sizeSelector = new ChoiceBox<>(), recLimit = new ChoiceBox<>();
+    ChoiceBox<String> imgText = new ChoiceBox<>();
     volatile boolean isTurn = false;
     volatile TTTHandler handler;
-    Background background = new Background(new BackgroundImage(new Image("BG1.png"),null,null,null,null));
+    Background background = new Background(new BackgroundImage(new Image("GP5.png"),null,null,null,null));
     public static void main(String[] args){
         launch();
     }
@@ -71,6 +72,8 @@ public class TTTGui extends Application
         sizeSelector.getSelectionModel().selectFirst();
         recLimit.getItems().addAll(4,5,6,7,8,9,10);
         recLimit.getSelectionModel().select(5);
+        imgText.getItems().addAll("GP1.png","GP2.png","GP3.png","GP4.png","GP5.png");
+        imgText.getSelectionModel().selectFirst();
         //Loading scene
         loadingGr.add(siztext, 0, 2);
         GridPane.setConstraints(siztext, 0, 2, 1, 1, HPos.CENTER, VPos.TOP);
@@ -94,6 +97,10 @@ public class TTTGui extends Application
         GridPane.setConstraints(timeLimit, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.add(timeText, 0, 1);
         GridPane.setConstraints(timeText, 0, 1, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.add(imgText,2,0);
+        GridPane.setConstraints(imgText,1,2,2,2,HPos.CENTER,VPos.CENTER);
+        loadingGr.add(img,2,0);
+        GridPane.setConstraints(img,0,2,2,2,HPos.LEFT, VPos.CENTER);
         loadingGr.setBackground(background);
         loadingGr.setVgap(25);
         loadingGr.setHgap(25);
