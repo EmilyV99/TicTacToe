@@ -1,7 +1,7 @@
 public class TTTBoard
 {
     public static final int BLANK = 0, X = 1, O = 2, TIE = -1;
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
     private int board[][]; //This is the board. `0` means blank, `1` means X, `2` means O. -V
     private final int size, reclimit;
     private final long timeLimit;

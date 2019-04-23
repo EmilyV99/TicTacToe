@@ -15,7 +15,7 @@ import javafx.scene.layout.BackgroundImage;
 
 public class TTTGui extends Application
 {
-    static final int MINW = 500, MINH = 500, DEFW = 600, DEFH = 600, MAXW = 600, MAXH = 600, //Window size
+    static final int MINW = 500, MINH = 500, DEFW = 700, DEFH = 700, MAXW = 700, MAXH = 700, //Window size
             BTN_W = 60, BTN_H = BTN_W, MAX_SIZE = 8;
     Stage stage;//Stage object
     Scene loadingSc, playSc;
@@ -24,22 +24,14 @@ public class TTTGui extends Application
     Button startx = new Button("Start (X)"), starto = new Button("Start (O)"), startr = new Button("Start (random)"), b00 = new Button(), b01 = new Button(), b02 = new Button(), b10 = new Button(),
             b11 = new Button(), b12 = new Button(), b20 = new Button(), b21 = new Button(), b22 = new Button(), mainmenu = new Button("Main Menu");
     Button[] buttons = new Button[]{startx, starto, startr, mainmenu};
-    Button[][] gridButtons = new Button[][]{{new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()},
-                                            {new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button(), new Button()}};
-    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), img = new Text("Image Selection"),timeText = new Text("Time Limit");
+    Button[][] gridButtons = new Button[MAX_SIZE][MAX_SIZE];
+    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), imgText = new Text("Image Selection"),timeText = new Text("Time Limit");
     TextField timeLimit = new TextField("30");
     ChoiceBox<String> diff = new ChoiceBox<>();
     ChoiceBox<Integer> sizeSelector = new ChoiceBox<>(), recLimit = new ChoiceBox<>();
-    ChoiceBox<String> imgText = new ChoiceBox<>();
+    ChoiceBox<String> imgList = new ChoiceBox<>();
     volatile boolean isTurn = false;
     volatile TTTHandler handler;
-    Background background = new Background(new BackgroundImage(new Image("GP5.png"),null,null,null,null));
     public static void main(String[] args){
         launch();
     }
@@ -49,6 +41,7 @@ public class TTTGui extends Application
         for(Button b : buttons){
             b.setOnAction(e-> buttonClick(e));
         }
+        for()//MAKE BUTTONS HERE
         for(Button[] barr : gridButtons)
             for(Button b : barr)
             {
@@ -61,19 +54,21 @@ public class TTTGui extends Application
             grid.setAlignment(Pos.CENTER);
             grid.setPadding(new Insets(20,20,20,20));
         }
+        imgList.setOnAction(e-> updateBG());
         msg.setId("text");
         rltext.setId("text");
         siztext.setId("text");
         difftext.setId("text"); 
         timeText.setId("text");
+        imgText.setId("text");
         diff.getItems().addAll("Easy","Normal","Hard","Impossible");
         diff.getSelectionModel().selectLast();
         sizeSelector.getItems().addAll(3,4,5,6,7,8);
         sizeSelector.getSelectionModel().selectFirst();
         recLimit.getItems().addAll(4,5,6,7,8,9,10);
         recLimit.getSelectionModel().select(5);
-        imgText.getItems().addAll("GP1.png","GP2.png","GP3.png","GP4.png","GP5.png");
-        imgText.getSelectionModel().selectFirst();
+        imgList.getItems().addAll("BG1.png","BG2.png","BG3.png","BG4.png","BG5.png");
+        imgList.getSelectionModel().selectFirst();
         //Loading scene
         loadingGr.add(siztext, 0, 2);
         GridPane.setConstraints(siztext, 0, 2, 1, 1, HPos.CENTER, VPos.TOP);
@@ -97,11 +92,11 @@ public class TTTGui extends Application
         GridPane.setConstraints(timeLimit, 0, 1, 1, 1, HPos.CENTER, VPos.CENTER);
         loadingGr.add(timeText, 0, 1);
         GridPane.setConstraints(timeText, 0, 1, 1, 1, HPos.CENTER, VPos.TOP);
+        loadingGr.add(imgList,2,0);
+        GridPane.setConstraints(imgList,2,0,1,1,HPos.CENTER,VPos.CENTER);
         loadingGr.add(imgText,2,0);
-        GridPane.setConstraints(imgText,1,2,2,2,HPos.CENTER,VPos.CENTER);
-        loadingGr.add(img,2,0);
-        GridPane.setConstraints(img,0,2,2,2,HPos.LEFT, VPos.CENTER);
-        loadingGr.setBackground(background);
+        GridPane.setConstraints(imgText,2,0,1,1,HPos.CENTER, VPos.TOP);
+        loadingGr.setBackground(new Background(new BackgroundImage(new Image(imgList.getValue()),null,null,null,null)));
         loadingGr.setVgap(25);
         loadingGr.setHgap(25);
         ColumnConstraints c = new ColumnConstraints(100);
@@ -183,7 +178,7 @@ public class TTTGui extends Application
         GridPane.setConstraints(msg, 0, size, size, 1, HPos.CENTER, VPos.CENTER);
         playGr.add(mainmenu, 0, size + 1);
         GridPane.setConstraints(mainmenu, 0, size + 1, size, 1, HPos.CENTER, VPos.CENTER);
-        playGr.setBackground(background);
+        updateBG();
         long time = 30000L;
         try
         {
@@ -222,6 +217,12 @@ public class TTTGui extends Application
             msg.setText("");
             handler = null;
         });
+    }
+    private void updateBG()
+    {
+        Background bg = new Background(new BackgroundImage(new Image(imgList.getValue()),null,null,null,null));
+        loadingGr.setBackground(bg);
+        playGr.setBackground(bg);
     }
     public void updateButtons(TTTBoard board)
     {
