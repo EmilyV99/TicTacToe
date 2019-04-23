@@ -11,7 +11,10 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.RowConstraints;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 public class TTTGui extends Application
 {
@@ -25,11 +28,12 @@ public class TTTGui extends Application
             b11 = new Button(), b12 = new Button(), b20 = new Button(), b21 = new Button(), b22 = new Button(), mainmenu = new Button("Main Menu");
     Button[] buttons = new Button[]{startx, starto, startr, mainmenu};
     Button[][] gridButtons = new Button[MAX_SIZE][MAX_SIZE];
-    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), imgText = new Text("Image Selection"),timeText = new Text("Time Limit");
-    TextField timeLimit = new TextField("30");
+    Text msg = new Text(), rltext = new Text("RecursionLimit"), siztext = new Text("Board Size"), difftext = new Text("Difficulty"), imgText = new Text("Background"),timeText = new Text("Time Limit"), colorText = new Text("Solid color");
+    TextField timeLimit = new TextField("30"), colorCode = new TextField("0xFFF");
     ChoiceBox<String> diff = new ChoiceBox<>();
     ChoiceBox<Integer> sizeSelector = new ChoiceBox<>(), recLimit = new ChoiceBox<>();
-    ChoiceBox<String> imgList = new ChoiceBox<>();
+    ChoiceBox<BGHolder> imgList = new ChoiceBox<>();
+    CheckBox useColor = new CheckBox();
     volatile boolean isTurn = false;
     volatile TTTHandler handler;
     public static void main(String[] args){
@@ -54,13 +58,13 @@ public class TTTGui extends Application
             grid.setAlignment(Pos.CENTER);
             grid.setPadding(new Insets(20,20,20,20));
         }
-        imgList.setOnAction(e-> updateBG());
         msg.setId("text");
         rltext.setId("text");
         siztext.setId("text");
         difftext.setId("text"); 
         timeText.setId("text");
         imgText.setId("text");
+        colorText.setId("text");
         diff.getItems().addAll("Easy","Normal","Hard","Impossible");
         diff.getSelectionModel().selectLast();
         for(int s = 3; s <= MAX_SIZE; ++s)
@@ -68,8 +72,17 @@ public class TTTGui extends Application
         sizeSelector.getSelectionModel().selectFirst();
         recLimit.getItems().addAll(4,5,6,7,8,9,10);
         recLimit.getSelectionModel().select(5);
-        imgList.getItems().addAll("BG1.png","BG2.png","BG3.png","BG4.png");
+        imgList.getItems().addAll(
+            new BGHolder(new Background(new BackgroundImage(new Image("BG1.png"),null,null,null,null)), "BG1.png"),
+            new BGHolder(new Background(new BackgroundImage(new Image("BG2.png"),null,null,null,null)), "BG2.png"),
+            new BGHolder(new Background(new BackgroundImage(new Image("BG3.png"),null,null,null,null)), "BG3.png"),
+            new BGHolder(new Background(new BackgroundImage(new Image("BG4.png"),null,null,null,null)), "BG4.png"),
+            new BGHolder(new Background(new BackgroundImage(new Image("uhart.jpg"),null,null,null,null)), "uhart.jpg")
+        );
         imgList.getSelectionModel().selectFirst();
+        imgList.setOnAction(e-> updateBG());
+        colorCode.setOnAction(e-> forceUpdateBG());
+        useColor.setOnAction(e-> updateBG());
         //Loading scene
         loadingGr.add(siztext, 0, 2);
         GridPane.setConstraints(siztext, 0, 2, 1, 1, HPos.CENTER, VPos.TOP);
@@ -97,7 +110,13 @@ public class TTTGui extends Application
         GridPane.setConstraints(imgList,2,0,1,1,HPos.CENTER,VPos.CENTER);
         loadingGr.add(imgText,2,0);
         GridPane.setConstraints(imgText,2,0,1,1,HPos.CENTER, VPos.TOP);
-        loadingGr.setBackground(new Background(new BackgroundImage(new Image(imgList.getValue()),null,null,null,null)));
+        loadingGr.add(colorCode, 0, 0);
+        GridPane.setConstraints(colorCode,0,0,1,1,HPos.CENTER, VPos.CENTER);
+        loadingGr.add(colorText, 0, 0);
+        GridPane.setConstraints(colorText,0,0,1,1,HPos.CENTER, VPos.TOP);
+        loadingGr.add(useColor, 0, 0);
+        GridPane.setConstraints(useColor,0,0,1,1,HPos.CENTER, VPos.BOTTOM);
+        updateBG();
         loadingGr.setVgap(25);
         loadingGr.setHgap(25);
         ColumnConstraints c = new ColumnConstraints(100);
@@ -211,6 +230,7 @@ public class TTTGui extends Application
             msg.setText(str);
         });
     }
+    
     public void handleCrash()
     {
         Platform.runLater(() -> {
@@ -219,12 +239,46 @@ public class TTTGui extends Application
             handler = null;
         });
     }
+    
+    private void forceUpdateBG()
+    {
+        String ccode = colorCode.getCharacters().toString();
+        if(isHexColor(ccode))
+        {
+            if(!useColor.isSelected()) useColor.fire();
+            else updateBG();
+        }
+        else
+        {
+            if(useColor.isSelected()) useColor.fire();
+            else updateBG();
+        }
+    }
+    
     private void updateBG()
     {
-        Background bg = new Background(new BackgroundImage(new Image(imgList.getValue()),null,null,null,null));
-        loadingGr.setBackground(bg);
-        playGr.setBackground(bg);
+        if(useColor.isSelected())
+        {
+            String ccode = colorCode.getCharacters().toString();
+            if(isHexColor(ccode))
+            {
+                Background bg = new Background(new BackgroundFill(Color.web(ccode),null,null));
+                loadingGr.setBackground(bg);
+                playGr.setBackground(bg);
+            }
+            else
+            {
+                useColor.fire();
+            }
+        }
+        else
+        {
+            Background bg = imgList.getValue().getBG();
+            loadingGr.setBackground(bg);
+            playGr.setBackground(bg);
+        }
     }
+    
     public void updateButtons(TTTBoard board)
     {
         Platform.runLater(() -> {
@@ -254,5 +308,18 @@ public class TTTGui extends Application
                     }
                 }
         });
+    }
+    
+    private boolean isHexColor(String str)
+    {
+        try
+        {
+            Color.web(str);
+            return true;
+        }
+        catch(IllegalArgumentException | NullPointerException e)
+        {
+            return false;
+        }
     }
 }
