@@ -15,8 +15,8 @@ import javafx.scene.layout.BackgroundImage;
 
 public class TTTGui extends Application
 {
-    static final int MINW = 500, MINH = 500, DEFW = 700, DEFH = 700, MAXW = 700, MAXH = 700, //Window size
-            BTN_W = 60, BTN_H = BTN_W, MAX_SIZE = 8;
+    static final int MINW = 500, MINH = 500, DEFW = 700, DEFH = 700,// MAXW = 1000, MAXH = 1000, //Window size
+            BTN_W = 60, BTN_H = BTN_W, MAX_SIZE = 15;
     Stage stage;//Stage object
     Scene loadingSc, playSc;
     GridPane loadingGr = new GridPane(), playGr = new GridPane();
@@ -41,14 +41,14 @@ public class TTTGui extends Application
         for(Button b : buttons){
             b.setOnAction(e-> buttonClick(e));
         }
-        for()//MAKE BUTTONS HERE
-        for(Button[] barr : gridButtons)
-            for(Button b : barr)
+        for(int x = 0; x < MAX_SIZE; ++x)
+            for(int y = 0; y < MAX_SIZE; ++y)
             {
-                b.setOnAction(e-> buttonClick(e));
-                b.setMinSize(BTN_W, BTN_H);
-                b.setMaxSize(BTN_W, BTN_H);
-                b.setId("gridb");
+                gridButtons[x][y] = new Button();
+                gridButtons[x][y].setOnAction(e-> buttonClick(e));
+                gridButtons[x][y].setMinSize(BTN_W, BTN_H);
+                gridButtons[x][y].setMaxSize(BTN_W, BTN_H);
+                gridButtons[x][y].setId("gridb");
             }
         for(GridPane grid : grids){
             grid.setAlignment(Pos.CENTER);
@@ -63,11 +63,12 @@ public class TTTGui extends Application
         imgText.setId("text");
         diff.getItems().addAll("Easy","Normal","Hard","Impossible");
         diff.getSelectionModel().selectLast();
-        sizeSelector.getItems().addAll(3,4,5,6,7,8);
+        for(int s = 3; s <= MAX_SIZE; ++s)
+            sizeSelector.getItems().add(s);
         sizeSelector.getSelectionModel().selectFirst();
         recLimit.getItems().addAll(4,5,6,7,8,9,10);
         recLimit.getSelectionModel().select(5);
-        imgList.getItems().addAll("BG1.png","BG2.png","BG3.png","BG4.png","BG5.png");
+        imgList.getItems().addAll("BG1.png","BG2.png","BG3.png","BG4.png");
         imgList.getSelectionModel().selectFirst();
         //Loading scene
         loadingGr.add(siztext, 0, 2);
@@ -117,8 +118,8 @@ public class TTTGui extends Application
         primaryStage.setMinHeight(MINH);
         primaryStage.setWidth(DEFH);
         primaryStage.setHeight(DEFW);
-        primaryStage.setMaxWidth(MAXW);
-        primaryStage.setMaxHeight(MAXH);
+        //primaryStage.setMaxWidth(MAXW);
+        //primaryStage.setMaxHeight(MAXH);
         primaryStage.setScene(loadingSc);
         primaryStage.setResizable(true);
         primaryStage.setOnCloseRequest(e-> {
