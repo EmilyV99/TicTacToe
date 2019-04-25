@@ -1,8 +1,0 @@
-X is negative, O is positive
-
-3 in a row = 1000
-2 and a blank = 10
-2 and the other = -5
-1 and 2 blanks = 4
-1 of each type = 0
-3 blank = 0
